@@ -58,19 +58,24 @@ def save_out_labeled_data_to_npy_files(save_path, X, y, folds):
     num_folds = folds.shape[1]
     print X.shape
     print numpy.transpose(folds)
+    numpy.save(os.path.join(split_path, 'X.npy'), X)
+    numpy.save(os.path.join(split_path, 'y.npy'), y)
     for i in range(num_folds):
         print i
-        inds = folds[:, i] != 0
-        print sum(inds == True)
-        X_save = X[inds, :, :, :]
-        print X_save.shape
-        fold_save = (folds[inds, i]-1)
+        inds_trn = folds[:, i] == 1
+        inds_tst = folds[:, i] == 2
+        inds_val = folds[:, i] == 3
+        print sum(inds_trn == True), sum(inds_tst == True), sum(inds_val == True)
+
+        #X_save = X[inds, :, :, :]
+        #print X_save.shape
+        #fold_save = (folds[inds, i]-1)
 
         split_path = os.path.join(save_path, 'split_'+str(i))
         make_dirs(split_path)
-        numpy.save(os.path.join(split_path, 'X.npy'), X_save)
-        numpy.save(os.path.join(split_path, 'y.npy'), y)
-        numpy.save(os.path.join(split_path, 'folds.npy'), fold_save)
+        numpy.save(os.path.join(split_path, 'trn_ind.npy'), inds_trn)
+        numpy.save(os.path.join(split_path, 'tst_ind.npy'), inds_tst)
+        numpy.save(os.path.join(split_path, 'val_ind.npy'), inds_val)
 
 
 if __name__ == "__main__":
