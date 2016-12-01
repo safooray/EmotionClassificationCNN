@@ -13,10 +13,10 @@ import tensorflow as tf
 IMAGE_SIZE = 48
 NUM_CHANNELS = 1
 PIXEL_DEPTH = 255
-NUM_LABELS = 8
+NUM_LABELS = 7
 BATCH_SIZE = 64
 EVAL_BATCH_SIZE = 64
-NUM_EPOCHS = 2
+NUM_EPOCHS = 1
 SEED = 1550
 EVAL_FREQUENCY = 8 
 
@@ -29,13 +29,23 @@ def error_rate(predictions, labels):
 
 
 def main():
-    path_in =  os.path.join(os.getcwd(), 'data/npy_files/TFD_48/split_0/')
-    train_data = numpy.random.rand(512, 48, 48, 1)#numpy.load(os.path.join(path_in, 'X.npy'))
-    train_labels = numpy.random.randint(0, 6, 512) #numpy.load(os.path.join(path_in, 'y.npy'))
-    test_data = numpy.random.rand(256, 48, 48, 1)
-    test_labels = numpy.random.randint(0, 6, 256)
-    validation_data = numpy.random.rand(128, 48, 48, 1)
-    validation_labels = numpy.random.randint(0, 6, 128)
+    path_in =  os.path.join(os.getcwd(), 'TFD_HERE/npy_files/TFD_48/')
+    split = 'split_0'
+
+    path_inds =  os.path.join(path_in, split)
+    trn_ind = numpy.load(os.path.join(path_inds, 'trn_ind.npy'))
+    tst_ind = numpy.load(os.path.join(path_inds, 'tst_ind.npy'))
+    val_ind = numpy.load(os.path.join(path_inds, 'val_ind.npy'))
+
+    labeled_data = numpy.load(os.path.join(path_in, 'X.npy')) * 2 / 255.0
+    labels =  numpy.load(os.path.join(path_in, 'y.npy')) - 1
+    train_data = labeled_data[trn_ind, ...]
+    train_labels = labels[trn_ind, ...] 
+    print (min(train_labels), max(train_labels), 'Done')
+    test_data = labeled_data[tst_ind, ...]
+    test_labels = labels [tst_ind, ...]
+    validation_data = labeled_data[val_ind, ...]
+    validation_labels = labels[val_ind, ...]
 
     train_size = train_labels.shape[0]
     train_data_node = tf.placeholder(tf.float32, shape = (BATCH_SIZE, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS))
@@ -49,6 +59,10 @@ def main():
 
     conv2_weights = tf.Variable(tf.truncated_normal([5,5,32,64], stddev = .1, seed = SEED, dtype = tf.float32))
     conv2_biases = tf.Variable(tf.zeros([64], dtype = tf.float32))
+
+    conv3_weights = tf.Variable(tf.truncated_normal([5,5,64,128], stddev = .1, seed = SEED, dtype = tf.float32))
+    conv3_biases = tf.Variable(tf.zeros([128], dtype = tf.float32))
+
 
     fc1_weights = tf.Variable(tf.truncated_normal([int(IMAGE_SIZE/4 * IMAGE_SIZE/4 * 64), 512], stddev=0.1, seed=SEED, dtype=tf.float32))
     fc1_biases = tf.Variable(tf.constant(0.1, shape=[512], dtype=tf.float32))
@@ -168,6 +182,7 @@ def main():
         _, l, lr, predictions = sess.run(
             [optimizer, loss, learning_rate, train_prediction],
             feed_dict=feed_dict)
+	#print (numpy.argmax(predictions, 1))
         if (step + 1) % EVAL_FREQUENCY == 0:
           elapsed_time = time.time() - start_time
           start_time = time.time()
