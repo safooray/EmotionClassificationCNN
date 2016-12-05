@@ -2,3 +2,8 @@ data
 TFD_HERE
 *.pyc
 *.mat
+*.txt
+*.png
+*.pdf
+results/
+tmp*
