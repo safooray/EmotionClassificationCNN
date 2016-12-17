@@ -1,9 +1,12 @@
 data
 TFD_HERE
+Natural*
+visuals*
 *.pyc
 *.mat
 *.txt
 *.png
 *.pdf
-results/
+*results/
 tmp*
+*.pny
